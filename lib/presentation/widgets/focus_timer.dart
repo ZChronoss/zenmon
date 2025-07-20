@@ -115,66 +115,74 @@ class _FocusTimerState extends State<FocusTimer> {
           ),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: _isRunning ? null : _startTimer,
-          child: const Text("Start Timer") // Use const for Text widget
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _isRunning ? null : _startTimer,
+              child: const Text("Start Timer") // Use const for Text widget
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: !_isRunning ? null : () {
+                // Determine the platform and show the appropriate alert dialog
+                if (Theme.of(context).platform == TargetPlatform.iOS) {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        title: const Text("Are you sure?"),
+                        content: const Text("Do you really want to reset the timer?"),
+                        actions: [
+                          CupertinoDialogAction(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Cancel"),
+                          ),
+                          CupertinoDialogAction(
+                            isDestructiveAction: true, // Makes the text red for destructive actions
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _resetTimer();
+                            },
+                            child: const Text("Reset"), // Changed to "Reset" for brevity
+                          )
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  // Default Android AlertDialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Are you sure?"),
+                        content: const Text("Do you really want to reset the timer?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Cancel")
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _resetTimer();
+                            },
+                            child: const Text("Yes")
+                          )
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+              child: const Text("Reset Timer")
+            )
+          ],
         ),
-        const SizedBox(height: 8), // Added a small SizedBox for spacing between buttons
-        ElevatedButton(
-          onPressed: !_isRunning ? null : () {
-            // Determine the platform and show the appropriate alert dialog
-            if (Theme.of(context).platform == TargetPlatform.iOS) {
-              showCupertinoDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text("Are you sure?"),
-                    content: const Text("Do you really want to reset the timer?"),
-                    actions: [
-                      CupertinoDialogAction(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text("Cancel"),
-                      ),
-                      CupertinoDialogAction(
-                        isDestructiveAction: true, // Makes the text red for destructive actions
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _resetTimer();
-                        },
-                        child: const Text("Reset"), // Changed to "Reset" for brevity
-                      )
-                    ],
-                  );
-                },
-              );
-            } else {
-              // Default Android AlertDialog
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Are you sure?"),
-                    content: const Text("Do you really want to reset the timer?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text("Cancel")
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _resetTimer();
-                        },
-                        child: const Text("Yes")
-                      )
-                    ],
-                  );
-                },
-              );
-            }
-          },
-          child: const Text("Reset Timer")
-        )
+        
+         // Added a small SizedBox for spacing between buttons
+        
       ],
     );
   }
