@@ -15,7 +15,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   Future<Pokemon> fetchPokemon(int id) async {
     final response = await client.get(
       Uri.parse('https://pokeapi.co/api/v2/pokemon/$id'),
-      headers: {'Content-Type': 'application/json'},
+      // headers: {'Content-Type': 'application/json'},
     );
 
     if (response.statusCode != 200) {

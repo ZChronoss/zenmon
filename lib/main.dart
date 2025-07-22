@@ -7,6 +7,8 @@ import 'package:zenmon/presentation/pages/home/home_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:zenmon/presentation/pages/home/home_view_model.dart';
 
+import 'package:zenmon/presentation/pages/home/peer_connection_view_model.dart';
+
 void main() {
   final client = http.Client();
   final pokemonRemoteDataSource = PokemonRemoteDataSourceImpl(client);
@@ -18,6 +20,9 @@ void main() {
       providers: [
         ChangeNotifierProvider(
           create: (_) => HomeViewModel(getPokemonUseCase)
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PeerConnectionViewModel()
         )
       ],
       child: MaterialApp(
