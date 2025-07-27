@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:zenmon/presentation/widgets/custom_alert_dialog.dart';
 import 'package:zenmon/presentation/widgets/timer_minute_picker.dart';
 
 class FocusTimer extends StatefulWidget {
@@ -77,124 +77,97 @@ class _FocusTimerState extends State<FocusTimer> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+    // Extracted: Minute Picker Widget
+  Widget _buildMinutePicker() {
+    return TimerMinutePicker(
+      selectedMinute: _remaining.inMinutes,
+      onMinuteChange: (minute) {
+        setState(() {
+          _remaining = Duration(minutes: minute);
+        });
+      }
+    );
+  }
+
+    // Extracted: Timer Text Widget
+  Widget _buildTimerText(BuildContext context) {
     final minutes = _remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = _remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return Text(
+      '$minutes:$seconds',
+      style: Theme.of(context).textTheme.displayMedium,
+    );
+  }
 
-    final minutePicker = 
-      TimerMinutePicker(
-        selectedMinute: _remaining.inMinutes, // Use _remaining.inMinutes for current selection
-        onMinuteChange: (minute) {
-          setState(() {
-            _remaining = Duration(minutes: minute);
-          });
+    Widget _buildTimerGestureDetector(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (!_isRunning) {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => _buildMinutePicker(),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Cannot change timer while it's running. Reset first.")),
+          );
         }
-      );
+      },
+      child: _buildTimerText(context),
+    );
+  }
 
-    final timersRunningSnackbar = 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cannot change timer while it's running. Reset first.")),
-      );
+  Widget _buildStartButton() {
+    return ElevatedButton(
+      onPressed: _isRunning ? null : _startTimer,
+      child: const Text("Start Timer"),
+    );
+  }
 
-    final timerText = 
-      Text(
-        '$minutes:$seconds',
-        style: Theme.of(context).textTheme.displayMedium,
-      );
+  Widget _buildResetButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: !_isRunning
+          ? null
+          : () {
+            showDialog(
+              context: context, 
+              builder: (BuildContext context) {
+                return CustomAlertDialog(
+                  title: "Are you sure?", 
+                  content: "Do you really want to reset the timer?",
+                  cancelText: "Cancel",
+                  confirmText: "Yes",
+                  onCancel: () => Navigator.of(context).pop(),
+                  onConfirm: () {
+                    Navigator.of(context).pop();
+                    _resetTimer();
+                  },
+                );
+              });
+            },
+      child: const Text("Reset Timer"),
+    );
+  }
 
-    final timerGestureDetector = 
-      GestureDetector(
-        onTap: () {
-          // Only allow changing time if timer is not running
-          if (!_isRunning) {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return minutePicker;
-              },
-            );
-          } else {
-            // show a message that timer cannot be changed while running
-            timersRunningSnackbar;
-          }
-        },
-        child: timerText
-      );
+  Widget _buildButtonRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildStartButton(),
+        const SizedBox(width: 8),
+        _buildResetButton(context),
+      ],
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        timerGestureDetector,
+        _buildTimerGestureDetector(context),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _isRunning ? null : _startTimer,
-              child: const Text("Start Timer") // Use const for Text widget
-            ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: !_isRunning ? null : () {
-                // Determine the platform and show the appropriate alert dialog
-                if (Theme.of(context).platform == TargetPlatform.iOS) {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CupertinoAlertDialog(
-                        title: const Text("Are you sure?"),
-                        content: const Text("Do you really want to reset the timer?"),
-                        actions: [
-                          CupertinoDialogAction(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("Cancel"),
-                          ),
-                          CupertinoDialogAction(
-                            isDestructiveAction: true, // Makes the text red for destructive actions
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _resetTimer();
-                            },
-                            child: const Text("Reset"), // Changed to "Reset" for brevity
-                          )
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  // Default Android AlertDialog
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text("Are you sure?"),
-                        content: const Text("Do you really want to reset the timer?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("Cancel")
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _resetTimer();
-                            },
-                            child: const Text("Yes")
-                          )
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              child: const Text("Reset Timer")
-            )
-          ],
-        ),
-        
-         // Added a small SizedBox for spacing between buttons
-        
+        _buildButtonRow(context)
       ],
     );
   }
