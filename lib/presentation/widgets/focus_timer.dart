@@ -82,38 +82,50 @@ class _FocusTimerState extends State<FocusTimer> {
     final minutes = _remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = _remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
 
+    final minutePicker = 
+      TimerMinutePicker(
+        selectedMinute: _remaining.inMinutes, // Use _remaining.inMinutes for current selection
+        onMinuteChange: (minute) {
+          setState(() {
+            _remaining = Duration(minutes: minute);
+          });
+        }
+      );
+
+    final timersRunningSnackbar = 
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Cannot change timer while it's running. Reset first.")),
+      );
+
+    final timerText = 
+      Text(
+        '$minutes:$seconds',
+        style: Theme.of(context).textTheme.displayMedium,
+      );
+
+    final timerGestureDetector = 
+      GestureDetector(
+        onTap: () {
+          // Only allow changing time if timer is not running
+          if (!_isRunning) {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return minutePicker;
+              },
+            );
+          } else {
+            // show a message that timer cannot be changed while running
+            timersRunningSnackbar;
+          }
+        },
+        child: timerText
+      );
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
-          onTap: () {
-            // Only allow changing time if timer is not running
-            if (!_isRunning) {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) {
-                  return TimerMinutePicker(
-                    selectedMinute: _remaining.inMinutes, // Use _remaining.inMinutes for current selection
-                    onMinuteChange: (minute) {
-                      setState(() {
-                        _remaining = Duration(minutes: minute);
-                      });
-                    }
-                  );
-                },
-              );
-            } else {
-              // Optionally show a message that timer cannot be changed while running
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Cannot change timer while it's running. Reset first.")),
-              );
-            }
-          },
-          child: Text(
-            '$minutes:$seconds',
-            style: Theme.of(context).textTheme.displayMedium,
-          ),
-        ),
+        timerGestureDetector,
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

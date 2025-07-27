@@ -27,6 +27,42 @@ class _HomePageState extends State<HomePage> {
     final peerConnectionVM = Provider.of<PeerConnectionViewModel>(context);
     peerConnectionVM.userImageUrl = viewModel.pokemon?.animatedSpriteUrl ?? "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/12.gif";
 
+    // Component
+    final pokemonSprite = 
+      Image.network(
+        viewModel.pokemon!.animatedSpriteUrl!,
+        fit: BoxFit.fitHeight,
+        height: 100,
+      );
+
+    final peerPokemonSprite = 
+      Consumer<PeerConnectionViewModel>(
+        builder: (context, vm, child) {
+          var peerImageUrl = vm.peerImageUrl;
+          if(peerImageUrl != null) {
+            return Image.network(
+                peerImageUrl,
+                fit: BoxFit.fitHeight,
+                height: 100,
+            );
+          } else {
+            return SizedBox.shrink();
+          }
+      },);
+                        
+    final backgroundImage = 
+      Image.asset(
+        backgroundImageUrl,
+        fit: BoxFit.fitWidth,
+        width: double.infinity,
+      );
+
+    final errorMessage = 
+      Text(
+        "Error: ${viewModel.errorMessage!}",
+        style: const TextStyle(color: Colors.red),
+      );
+                        
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -39,44 +75,21 @@ class _HomePageState extends State<HomePage> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Image.asset(
-                      backgroundImageUrl,
-                      fit: BoxFit.fitWidth,
-                      width: double.infinity,
-                    ),
+                    backgroundImage,
                     if (viewModel.isLoading)
                       const CircularProgressIndicator()
                     else if (viewModel.errorMessage != null)
-                      Text(
-                        "Error: ${viewModel.errorMessage!}",
-                        style: const TextStyle(color: Colors.red),
-                      )
+                      errorMessage
                     else if (viewModel.pokemon != null)
                       Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // user's pokemon image
-                        Image.network(
-                          viewModel.pokemon!.animatedSpriteUrl!,
-                          fit: BoxFit.fitHeight,
-                          height: 100,
-                        ),
+                        pokemonSprite,
 
                         // peer's pokemon image
-                        Consumer<PeerConnectionViewModel>(
-                          builder: (context, vm, child) {
-                            var peerImageUrl = vm.peerImageUrl;
-                            if(peerImageUrl != null) {
-                              return Image.network(
-                                  peerImageUrl,
-                                  fit: BoxFit.fitHeight,
-                                  height: 100,
-                              );
-                            } else {
-                              return SizedBox.shrink();
-                            }
-                        },),
+                        peerPokemonSprite,
                           
                       ],
                     )
