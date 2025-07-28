@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
     context.read<HomeViewModel>().loadPokemon(Random().nextInt(649) + 1);
   }
 
-  Widget _buildBackgroundStack(BuildContext context, HomeViewModel viewModel, Widget pokemonSprite, Widget peerPokemonSprite, Widget errorMessage) {
+  Widget _buildBackgroundStack(BuildContext context, HomeViewModel viewModel, Widget pokemonSprite, Widget peerPokemonSprite) {
     return SizedBox(
       width: double.infinity,
       height: 450,
@@ -35,7 +35,10 @@ class _HomePageState extends State<HomePage> {
           if (viewModel.isLoading)
             const CircularProgressIndicator()
           else if (viewModel.errorMessage != null)
-            errorMessage
+            Text(
+              "Error: ${viewModel.errorMessage!}",
+              style: const TextStyle(color: Colors.red),
+            )
           else if (viewModel.pokemon != null)
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -96,18 +99,13 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    final errorMessage = Text(
-      "Error: ${viewModel.errorMessage!}",
-      style: const TextStyle(color: Colors.red),
-    );
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildBackgroundStack(context, viewModel, pokemonSprite, peerPokemonSprite, errorMessage),
+              _buildBackgroundStack(context, viewModel, pokemonSprite, peerPokemonSprite),
               const SizedBox(height: 16),
               FocusTimer(
                 duration: const Duration(minutes: 25),
