@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:peerdart/peerdart.dart';
 
-class PeerConnectionViewModel extends ChangeNotifier {
+class PeerConnectionViewModel extends ChangeNotifier with WidgetsBindingObserver {
   Peer? _peer; // Made nullable to handle dispose/reconnect
   DataConnection? _connection; // Made nullable
 
@@ -20,6 +20,21 @@ class PeerConnectionViewModel extends ChangeNotifier {
 
   PeerConnectionViewModel() {
     _initializePeer();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print(state);
+    
+    if(_isConnected && _connection != null) {
+      if(state == AppLifecycleState.paused) {
+        _connection!.send("offline");
+      } else if (state == AppLifecycleState.resumed) {
+        _connection!.send("online");
+      }
+    }
   }
 
   // Initializes the PeerJS client
@@ -76,7 +91,13 @@ class PeerConnectionViewModel extends ChangeNotifier {
       developer.log('Received data: $data from ${conn.peer}');
       // make sure data is string
       if(data is String) {
-        peerImageUrl = data;
+        if(data.toString().compareTo("offline") == 0) {
+          peerImageUrl = getBackImageUrl(peerImageUrl!);
+        } else if(data.toString().compareTo("online") == 0){
+          peerImageUrl = peerImageUrl?.replaceAll("/back", "");
+        } else {
+          peerImageUrl = data;
+        }
       }
       _addMessage("Friend: $data");
       notifyListeners();
@@ -92,7 +113,7 @@ class PeerConnectionViewModel extends ChangeNotifier {
     });
 
     conn.on("error").listen((err) {
-      developer.log('DataConnection Error: ${err.message}', error: err);
+      developer.log('DataConnection Error: $err', error: err);
       _addMessage('Connection Error with ${conn.peer}: ${err.message}');
       _isConnected = false;
       _connection = null;
@@ -157,5 +178,15 @@ class PeerConnectionViewModel extends ChangeNotifier {
     _peer?.dispose();
     remotePeerIdController.dispose();
     super.dispose();
+  }
+
+  String? getBackImageUrl(String imageUrl) {
+    List<String> splittedImageUrl = imageUrl.split("/");
+    int imageUrlArraySize = splittedImageUrl.length;
+
+    // add /back to the imageUrl to get the back sprite
+    splittedImageUrl.insert(imageUrlArraySize - 1, "back");
+
+    return splittedImageUrl.join("/");
   }
 }
