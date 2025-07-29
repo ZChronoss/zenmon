@@ -23,6 +23,85 @@ class PeerConnection extends StatelessWidget {
     );
   }
 
+  Widget _buildPeerId(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Your Peer ID:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Consumer<PeerConnectionViewModel>(
+          builder: (context, vm, child) {
+            return SelectableText(
+              vm.peerId ?? "Loading...",
+              style: const TextStyle(fontSize: 18, color: Colors.blue),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRemotePeerIdField(BuildContext context, PeerConnectionViewModel peerConnectionVM) {
+    return TextField(
+      controller: peerConnectionVM.remotePeerIdController,
+      decoration: InputDecoration(
+        labelText: 'Friend\'s Peer ID',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+    );
+  }
+
+  Widget _buildConnectButton(PeerConnectionViewModel peerConnectionVM) {
+    return ElevatedButton(
+      onPressed: () {
+        peerConnectionVM.connect();
+      },
+      child: const Text("Connect"),
+    );
+  }
+
+  Widget _buildCloseConnectionButton(PeerConnectionViewModel peerConnectionVM) {
+    return ElevatedButton(
+      onPressed: peerConnectionVM.isConnected ? peerConnectionVM.closeConnection : null,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+      child: const Text("Close connection"),
+    );
+  }
+
+  Widget _buildMessagesList(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      padding: const EdgeInsets.all(12.0),
+      height: 200,
+      child: Consumer<PeerConnectionViewModel>(
+        builder: (context, vm, child) {
+          return ListView.builder(
+            itemCount: vm.messages.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Text(vm.messages[index]),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final peerConnectionVM = context.watch<PeerConnectionViewModel>();
@@ -39,73 +118,19 @@ class PeerConnection extends StatelessWidget {
                 return _buildConnectionState(context, vm.isConnected);
               },
             ),
-            const Text(
-              'Your Peer ID:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Consumer<PeerConnectionViewModel>(
-              builder: (context, vm, child) {
-                return SelectableText(
-                  vm.peerId ?? "Loading...",
-                  style: const TextStyle(fontSize: 18, color: Colors.blue),
-                );
-              },
-            ),
+            _buildPeerId(context),
             const SizedBox(height: 8),
-            TextField(
-              controller: peerConnectionVM.remotePeerIdController,
-              decoration: InputDecoration(
-                labelText: 'Friend\'s Peer ID',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              ),
-            ),
+            _buildRemotePeerIdField(context, peerConnectionVM),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () {
-                peerConnectionVM.connect();
-              },
-              child: const Text("Connect"),
-            ),
+            _buildConnectButton(peerConnectionVM),
             const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: peerConnectionVM.isConnected ? peerConnectionVM.closeConnection : null,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: const Text("Close connection"),
-            ),
+            _buildCloseConnectionButton(peerConnectionVM),
             const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              padding: const EdgeInsets.all(12.0),
-              height: 200,
-              child: Consumer<PeerConnectionViewModel>(
-                builder: (context, vm, child) {
-                  return ListView.builder(
-                    itemCount: vm.messages.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(vm.messages[index]),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
+            _buildMessagesList(context),
             const SizedBox(height: 12),
           ],
         ),
-      ),
+      )
     );
   }
 }

@@ -14,7 +14,7 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> loadPokemon(int id) async {
     setLoading(true);
     pokemon = null;
-    notifyListeners();
+    // notifyListeners();
 
     while(true) {
       try {
