@@ -26,7 +26,6 @@ class PeerConnectionViewModel extends ChangeNotifier with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    print(state);
     
     if(_isConnected && _connection != null) {
       if(state == AppLifecycleState.paused) {

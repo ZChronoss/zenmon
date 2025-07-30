@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:zenmon/presentation/pages/home/home_view_model.dart';
@@ -17,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<HomeViewModel>().loadPokemon(Random().nextInt(649) + 1);
+    context.read<HomeViewModel>().initialize();
   }
 
   Widget _buildBackgroundStack(BuildContext context, HomeViewModel viewModel, Widget pokemonSprite, Widget peerPokemonSprite) {
@@ -49,7 +48,12 @@ class _HomePageState extends State<HomePage> {
               ],
             )
           else
-            const Text("Click the button to load Pokémon!"),
+            ElevatedButton(
+              onPressed: () async {
+                await viewModel.openNewPokemon();
+              },
+              child: const Text("Open Your First Pokémon!"),
+            ),
         ],
       ),
     );

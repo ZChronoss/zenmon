@@ -1,12 +1,12 @@
 import 'package:zenmon/data/model/pokemon.dart';
 import 'package:zenmon/domain/pokemon/repository/pokemon_repository.dart';
 
-class GetPokemonUseCase {
+class SavePokemonUseCase {
   final PokemonRepository repository;
 
-  GetPokemonUseCase(this.repository);
+  SavePokemonUseCase(this.repository);
 
-  Future<Pokemon> execute(int id) {
-    return repository.getPokemon(id);
+  Future<void> execute(Pokemon pokemon) {
+    return repository.savePokemon(pokemon);
   }
 }

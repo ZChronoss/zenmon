@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:zenmon/constant.dart';
+import 'package:zenmon/data/model/growth_rate_model.dart';
 import '../model/pokemon.dart';
 
 abstract class PokemonRemoteDataSource {
   Future<Pokemon> fetchPokemon(int id);
+  Future<GrowthRateModel> fetchGrowthRate(String name);
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -14,8 +17,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   @override
   Future<Pokemon> fetchPokemon(int id) async {
     final response = await client.get(
-      Uri.parse('https://pokeapi.co/api/v2/pokemon/$id'),
-      // headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/pokemon/$id'),
     );
 
     if (response.statusCode != 200) {
@@ -23,17 +25,25 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
     }
 
     final jsonMap = json.decode(response.body);
-    return _mapJsonToPokemon(jsonMap);
+
+    final pokemon = Pokemon.fromJson(jsonMap);
+    return pokemon;
   }
-
-  Pokemon _mapJsonToPokemon(Map<String, dynamic> json) {
-    final sprites = json['sprites']?['versions']?['generation-v']?['black-white']?['animated'];
-    final spriteUrl = sprites?['front_default'] as String?;
-
-    return Pokemon(
-      id: json['id'],
-      name: json['name'],
-      animatedSpriteUrl: spriteUrl,
+  
+  @override
+  Future<GrowthRateModel> fetchGrowthRate(String name) async {
+    final response = await http.get(
+      Uri.parse('https://pokeapi.co/api/v2/growth-rate/$name')
     );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to fetch Pokémon');
+    }
+
+    final jsonMap = json.decode(response.body);
+
+    final growthRates = GrowthRateModel.fromJson(jsonMap);
+
+    return growthRates;
   }
 }
