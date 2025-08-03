@@ -16,14 +16,14 @@ class GrowthRateModel {
 
   factory GrowthRateModel.fromJson(Map<String, dynamic> json) {
     final levels = json['levels'] as List;
-    final Set<int> levelToExp = {
+    final Set<int> experiences = {
       for (var level in levels)
         level['experience'] as int
     };
 
     return GrowthRateModel(
       name: json['name'],
-      levelToExp: levelToExp.toList(),
+      levelToExp: experiences.toList(),
     );
   }
 }

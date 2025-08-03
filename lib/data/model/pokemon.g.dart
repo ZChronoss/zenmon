@@ -22,8 +22,18 @@ const PokemonSchema = CollectionSchema(
       name: r'animatedSpriteUrl',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(
+    r'experience': PropertySchema(
       id: 1,
+      name: r'experience',
+      type: IsarType.long,
+    ),
+    r'level': PropertySchema(
+      id: 2,
+      name: r'level',
+      type: IsarType.long,
+    ),
+    r'name': PropertySchema(
+      id: 3,
       name: r'name',
       type: IsarType.string,
     )
@@ -65,7 +75,9 @@ void _pokemonSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.animatedSpriteUrl);
-  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[1], object.experience);
+  writer.writeLong(offsets[2], object.level);
+  writer.writeString(offsets[3], object.name);
 }
 
 Pokemon _pokemonDeserialize(
@@ -77,8 +89,10 @@ Pokemon _pokemonDeserialize(
   final object = Pokemon(
     animatedSpriteUrl: reader.readStringOrNull(offsets[0]),
     id: id,
-    name: reader.readString(offsets[1]),
+    name: reader.readString(offsets[3]),
   );
+  object.experience = reader.readLong(offsets[1]);
+  object.level = reader.readLong(offsets[2]);
   return object;
 }
 
@@ -92,6 +106,10 @@ P _pokemonDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -339,6 +357,59 @@ extension PokemonQueryFilter
     });
   }
 
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> experienceEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'experience',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> experienceGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'experience',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> experienceLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'experience',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> experienceBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'experience',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -383,6 +454,59 @@ extension PokemonQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> levelEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> levelGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> levelLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'level',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterFilterCondition> levelBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'level',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -541,6 +665,30 @@ extension PokemonQuerySortBy on QueryBuilder<Pokemon, Pokemon, QSortBy> {
     });
   }
 
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> sortByExperience() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'experience', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> sortByExperienceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'experience', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> sortByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> sortByLevelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.desc);
+    });
+  }
+
   QueryBuilder<Pokemon, Pokemon, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -568,6 +716,18 @@ extension PokemonQuerySortThenBy
     });
   }
 
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenByExperience() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'experience', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenByExperienceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'experience', Sort.desc);
+    });
+  }
+
   QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -577,6 +737,18 @@ extension PokemonQuerySortThenBy
   QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QAfterSortBy> thenByLevelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'level', Sort.desc);
     });
   }
 
@@ -603,6 +775,18 @@ extension PokemonQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Pokemon, Pokemon, QDistinct> distinctByExperience() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'experience');
+    });
+  }
+
+  QueryBuilder<Pokemon, Pokemon, QDistinct> distinctByLevel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'level');
+    });
+  }
+
   QueryBuilder<Pokemon, Pokemon, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -622,6 +806,18 @@ extension PokemonQueryProperty
   QueryBuilder<Pokemon, String?, QQueryOperations> animatedSpriteUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'animatedSpriteUrl');
+    });
+  }
+
+  QueryBuilder<Pokemon, int, QQueryOperations> experienceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'experience');
+    });
+  }
+
+  QueryBuilder<Pokemon, int, QQueryOperations> levelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'level');
     });
   }
 

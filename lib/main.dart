@@ -17,7 +17,8 @@ void main() {
             di.getPokemonFromRemoteUseCase,
             di.getAllSavedPokemonUseCase,
             di.getSavedPokemonByIDUseCase,
-            di.savePokemonUseCase
+            di.savePokemonUseCase,
+            di.getGrowthRateUseCase
           )
         ),
         ChangeNotifierProvider(

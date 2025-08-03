@@ -5,7 +5,7 @@ import 'package:zenmon/presentation/widgets/timer_minute_picker.dart';
 
 class FocusTimer extends StatefulWidget {
   final Duration duration;
-  final VoidCallback? onFinished;
+  final void Function(int elapsedMinutes)? onFinished;
 
   const FocusTimer({
     super.key,
@@ -19,6 +19,7 @@ class FocusTimer extends StatefulWidget {
 
 class _FocusTimerState extends State<FocusTimer> {
   late Duration _remaining;
+  late Duration _initialDuration;
   Timer? _timer;
   bool _isRunning = false;
 
@@ -26,6 +27,7 @@ class _FocusTimerState extends State<FocusTimer> {
   void initState() {
     super.initState();
     _remaining = widget.duration;
+    _initialDuration = widget.duration; // Initialize _initialDuration
   }
 
   // This method is called whenever the widget's configuration changes.
@@ -44,11 +46,17 @@ class _FocusTimerState extends State<FocusTimer> {
     if (_isRunning) return;
 
     _isRunning = true;
+    _initialDuration = _remaining;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if(_remaining.inSeconds <= 1) {
         timer.cancel();
         _isRunning = false;
-        widget.onFinished?.call();
+
+        final elapsedMinutes = _getElapsedMinutes();
+        if (widget.onFinished != null) {
+          widget.onFinished!(elapsedMinutes); // Pass elapsed minutes
+        }
         // Ensure the UI updates to show 00:00 when finished
         setState(() {
           _remaining = Duration.zero;
@@ -64,6 +72,12 @@ class _FocusTimerState extends State<FocusTimer> {
 
   void _resetTimer() {
     _timer?.cancel();
+
+    // Calculate elapsed minutes before resetting
+    final elapsedMinutes = _getElapsedMinutes();
+    if (widget.onFinished != null && elapsedMinutes > 0) {
+      widget.onFinished!(elapsedMinutes); 
+    }
 
     setState(() {
       _remaining = widget.duration;
@@ -170,5 +184,10 @@ class _FocusTimerState extends State<FocusTimer> {
         _buildButtonRow(context)
       ],
     );
+  }
+
+  int _getElapsedMinutes() {
+    final elapsedSeconds = _initialDuration.inSeconds - _remaining.inSeconds;
+    return elapsedSeconds ~/ 60;
   }
 }

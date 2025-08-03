@@ -6,5 +6,5 @@ abstract class PokemonRepository {
   Future<Pokemon?> getSavedPokemonById(int id);
   Future<List<Pokemon>> getAllSavedPokemon();
   Future<void> savePokemon(Pokemon pokemon);
-  Future<GrowthRateModel> getGrowthRate(String name);
+  Future<GrowthRateModel> getGrowthRate(int id);
 }

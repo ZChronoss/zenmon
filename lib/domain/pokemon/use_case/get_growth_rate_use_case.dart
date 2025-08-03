@@ -6,7 +6,7 @@ class GetGrowthRateUseCase {
 
   GetGrowthRateUseCase(this.repository);
 
-  Future<GrowthRateModel> execute(String name) {
-    return repository.getGrowthRate(name);
+  Future<GrowthRateModel> execute(int pokemonId) {
+    return repository.getGrowthRate(pokemonId);
   }
 }

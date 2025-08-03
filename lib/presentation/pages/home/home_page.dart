@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildBackgroundStack(BuildContext context, HomeViewModel viewModel, Widget pokemonSprite, Widget peerPokemonSprite) {
     return SizedBox(
       width: double.infinity,
-      height: 450,
+      height: 350,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -48,15 +48,45 @@ class _HomePageState extends State<HomePage> {
               ],
             )
           else
-            ElevatedButton(
-              onPressed: () async {
-                await viewModel.openNewPokemon();
-              },
-              child: const Text("Open Your First Pokémon!"),
-            ),
+            SizedBox.shrink()
         ],
       ),
     );
+  }
+
+  Widget _buildOpenPokemonButton(BuildContext context, HomeViewModel viewModel) {
+    if (viewModel.pokemon == null || viewModel.pokemon!.level >= 50) {
+      return ElevatedButton(
+        onPressed: () async {
+          await viewModel.openNewPokemon();
+        },
+        child: const Text("Open Your Next Pokémon!"),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
+  Widget _buildPokemonInfo(BuildContext context, HomeViewModel viewModel) {
+    if (viewModel.pokemon != null){
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Level: ${viewModel.pokemon!.level}",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "Experience: ${viewModel.pokemon!.experience}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        );
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildConnectButton(BuildContext context) {
@@ -110,14 +140,19 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildBackgroundStack(context, viewModel, pokemonSprite, peerPokemonSprite),
+              _buildPokemonInfo(context, viewModel),
               const SizedBox(height: 16),
               FocusTimer(
                 duration: const Duration(minutes: 25),
-                onFinished: () {},
+                onFinished: (elapsedMinutes) {
+                  // use elapsed minutes as exp (1 minute = 1 exp)
+                  viewModel.checkForLevelUp(elapsedMinutes);
+                },
               ),
               const SizedBox(height: 12),
               _buildConnectButton(context),
               const SizedBox(height: 24),
+              _buildOpenPokemonButton(context, viewModel)
             ],
           ),
         ),

@@ -7,6 +7,7 @@ import '../model/pokemon.dart';
 abstract class PokemonRemoteDataSource {
   Future<Pokemon> fetchPokemon(int id);
   Future<GrowthRateModel> fetchGrowthRate(String name);
+  Future<String> fetchGrowthRateNameFromPokemon(int id);
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -45,5 +46,21 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
     final growthRates = GrowthRateModel.fromJson(jsonMap);
 
     return growthRates;
+  }
+
+  @override
+  Future<String> fetchGrowthRateNameFromPokemon(int id) async {
+    final speciesRes = await client.get(
+      Uri.parse('https://pokeapi.co/api/v2/pokemon-species/$id'),
+    );
+
+    if (speciesRes.statusCode != 200) {
+      throw Exception('Failed to load species data');
+    }
+
+    final speciesJson = jsonDecode(speciesRes.body);
+    final growthRateJson = speciesJson['growth_rate'];
+    return growthRateJson['name'];
+
   }
 }

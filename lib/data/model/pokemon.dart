@@ -7,6 +7,8 @@ class Pokemon {
   final Id id;
   final String name;
   final String? animatedSpriteUrl;
+  int level = 1;
+  int experience = 0;
 
   Pokemon({
     required this.id,

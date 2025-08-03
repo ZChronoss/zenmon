@@ -16,30 +16,33 @@ class PokemonRepositoryImpl implements PokemonRepository {
   }
 
   @override
-    Future<List<Pokemon>> getAllSavedPokemon() {
-      return localDataSource.getAllSavedPokemon();
-    }
-  
-    @override
-    Future<Pokemon?> getSavedPokemonById(int id) {
-      return localDataSource.getSavedPokemonById(id);
-    }
-  
-    @override
-    Future<void> savePokemon(Pokemon pokemon) {
-      return localDataSource.savePokemon(pokemon);
-    }
+  Future<List<Pokemon>> getAllSavedPokemon() {
+    return localDataSource.getAllSavedPokemon();
+  }
 
   @override
-  Future<GrowthRateModel> getGrowthRate(String name) async {
+  Future<Pokemon?> getSavedPokemonById(int id) {
+    return localDataSource.getSavedPokemonById(id);
+  }
+
+  @override
+  Future<void> savePokemon(Pokemon pokemon) {
+    return localDataSource.savePokemon(pokemon);
+  }
+
+  @override
+  Future<GrowthRateModel> getGrowthRate(int id) async {
+    // get growth rate name from pokemon's species
+    final growthRateName = await remoteDataSource.fetchGrowthRateNameFromPokemon(id);
+
     // if cache is available
-    final cached = await localDataSource.getCachedGrowthRate(name);
+    final cached = await localDataSource.getCachedGrowthRate(growthRateName);
     if (cached != null) {
       return cached;
     }
 
     // if not fetch from network
-    final model = await remoteDataSource.fetchGrowthRate(name);
+    final model = await remoteDataSource.fetchGrowthRate(growthRateName);
 
     // cache fetched growth rate
     await localDataSource.saveGrowthRate(model);
